@@ -1,0 +1,83 @@
+### empty body
+# Should return 400: Failed to read request
+POST localhost:8080/users/commands/create
+
+### empty parameters
+# Should return 400: Invalid parameters with list of missing parameters (name, primaryEmail -> required)
+POST localhost:8080/users/commands/create
+Content-Type: application/json
+
+{}
+
+### syntax errors
+# Should return 400: Invalid parameters (too_short, invalid_format)
+POST localhost:8080/users/commands/create
+Content-Type: application/json
+
+{
+  "name": "a",
+  "primaryEmail": "not-an-email"
+}
+
+### syntax error on email
+# Should return 400: Invalid parameters primaryEmail -> invalid_format
+POST localhost:8080/users/commands/create
+Content-Type: application/json
+
+{
+  "name": "John",
+  "primaryEmail": "not-an-email"
+}
+
+### valid parameters
+# First run 200, second 422: Email Not Unique (notice spaces) with error -> primaryEmail: email_not_unique (notice snake_case)
+POST localhost:8080/users/commands/create
+Content-Type: application/json
+
+{
+  "name": "Agnes",
+  "primaryEmail": "test@domain.com"
+}
+
+### reject john parameters
+# 422: Name Not Valid (without errors list - explicit decision) - we don't like John's :)
+POST localhost:8080/users/commands/create
+Content-Type: application/json
+
+{
+  "name": "John",
+  "primaryEmail": "test-john@domain.com"
+}
+
+### missing required parameter
+# 422: Bad Request - errors: primaryEmail->required
+POST localhost:8080/users/commands/create
+Content-Type: application/json
+
+{
+  "name": "John",
+  "secondaryEmail": "test2-john@domain.com"
+}
+
+### same email
+# 422: Secondary Email Must Be Diffent - no errors list (explicit decision)
+POST localhost:8080/users/commands/create
+Content-Type: application/json
+
+{
+  "name": "Anna",
+  "primaryEmail": "anna@domain.com",
+  "secondaryEmail": "anna@domain.com"
+}
+
+### second email invalid
+# 400: Bad Request - errors: secondaryEmail->invalid_format
+POST localhost:8080/users/commands/create
+Content-Type: application/json
+
+{
+  "name": "Anna",
+  "primaryEmail": "anna@domain.com",
+  "secondaryEmail": "not-an-email"
+}
+
